@@ -1,9 +1,10 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/DataverseStudyDAO.inc.php
+ * @file plugins/generic/dataverse/classes/DataverseStudyDAO.inc.php
  *
- * Copyright (c) 2003-2013 John Willinsky
+ * Copyright (c) 2013-2019 Simon Fraser University
+ * Copyright (c) 2003-2019 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class DataverseStudyDAO
@@ -15,18 +16,18 @@
 import('lib.pkp.classes.db.DAO');
 
 class DataverseStudyDAO extends DAO {
-  
+
 	/** @var $_parentPluginName string Name of parent plugin */
 	var $_parentPluginName;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function DataverseStudyDAO($parentPluginName) {
 		$this->_parentPluginName = $parentPluginName;
 		parent::DAO();
-	}  
-  
+	}
+
 	/**
 	 * Retrieve study by study ID.
 	 * @param $studyId int
@@ -34,7 +35,7 @@ class DataverseStudyDAO extends DAO {
 	 */
 	function &getStudy($studyId) {
 		$result =& $this->retrieve(
-			'SELECT * FROM dataverse_studies WHERE study_id = ?', $studyId
+			'SELECT * FROM dataverse_studies WHERE study_id = ?', (int)$studyId
 		);
 
 		$returner = null;
@@ -43,16 +44,16 @@ class DataverseStudyDAO extends DAO {
 		}
 		$result->Close();
 		return $returner;
-	}  
+	}
 
 	/**
-	 * Retrieve study matching a particular submission ID.
+	 * Get study by submission ID.
 	 * @param $submissionId int
 	 * @return DataverseStudy
 	 */
 	function &getStudyBySubmissionId($submissionId) {
 		$result =& $this->retrieve(
-			'SELECT * FROM dataverse_studies WHERE submission_id = ?', $submissionId
+			'SELECT * FROM dataverse_studies WHERE submission_id = ?', (int)$submissionId
 		);
 
 		$returner = null;
@@ -61,12 +62,12 @@ class DataverseStudyDAO extends DAO {
 		}
 		$result->Close();
 		return $returner;
-	}  
-  
+	}
+
 	/**
-	 * Insert a new study
+	 * Insert a new study.
 	 * @param $study DataverseStudy
-	 * @return int 
+	 * @return int
 	 */
 	function insertStudy(&$study) {
 		$ret = $this->update(
@@ -75,21 +76,22 @@ class DataverseStudyDAO extends DAO {
 				VALUES
 				(?, ?, ?, ?, ?, ?)',
 			array(
-				$study->getSubmissionId(),
+				(int)$study->getSubmissionId(),
 				$study->getEditUri(),
 				$study->getEditMediaUri(),
-        $study->getStatementUri(),
-        $study->getPersistentUri(),
-        $study->getDataCitation()
+				$study->getStatementUri(),
+				$study->getPersistentUri(),
+				$study->getDataCitation()
 			)
 		);
 		$study->setId($this->getInsertStudyId());
 		return $study->getId();
 	}
-  
+
 	/**
-	 * Update an existing study
+	 * Update an existing study.
 	 * @param $study DataverseStudy
+	 * @return boolean
 	 */
 	function updateStudy(&$study) {
 		$returner = $this->update(
@@ -102,25 +104,25 @@ class DataverseStudyDAO extends DAO {
 					data_citation = ?
 				WHERE study_id = ?',
 			array(
-        $study->getEditUri(),
-        $study->getEditMediaUri(),
-        $study->getStatementUri(),
-        $study->getPersistentUri(),
-        $study->getDataCitation(),
-        $study->getId()
+				$study->getEditUri(),
+				$study->getEditMediaUri(),
+				$study->getStatementUri(),
+				$study->getPersistentUri(),
+				$study->getDataCitation(),
+				(int)$study->getId()
 			)
 		);
 		return $returner;
-	}  
-  
+	}
+
 	/**
 	 * Get ID of last inserted study
 	 * @return int
 	 */
 	function getInsertStudyId() {
 		return $this->getInsertId('dataverse_studies', 'study_id');
-	}  
-  
+	}
+
 	/**
 	 * Delete Dataverse study.
 	 * @param $study DataverseStudy
@@ -137,11 +139,11 @@ class DataverseStudyDAO extends DAO {
 	 */
 	function deleteStudyById($studyId) {
 		$this->update(
-			'DELETE FROM dataverse_studies WHERE study_id = ?', $studyId
+			'DELETE FROM dataverse_studies WHERE study_id = ?', (int)$studyId
 		);
 	}
-  
-  
+
+
 	/**
 	 * Internal function to return DataverseStudy object from a row.
 	 * @param $row array
@@ -155,12 +157,11 @@ class DataverseStudyDAO extends DAO {
 		$study->setId($row['study_id']);
 		$study->setSubmissionId($row['submission_id']);
 		$study->setEditUri($row['edit_uri']);
-		$study->setEditMediaUri($row['edit_media_uri']);    
+		$study->setEditMediaUri($row['edit_media_uri']);
 		$study->setStatementUri($row['statement_uri']);
-    $study->setPersistentUri($row['persistent_uri']);
-    $study->setDataCitation($row['data_citation']);
-    
+		$study->setPersistentUri($row['persistent_uri']);
+		$study->setDataCitation($row['data_citation']);
+
 		return $study;
-	}  
+	}
 }
-?>
